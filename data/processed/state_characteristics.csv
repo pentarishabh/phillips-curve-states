@@ -1,0 +1,4 @@
+state,manufacturing_share_pct,energy_share_pct,unionization_rate_pct,median_household_income,pct_bachelors_degree,population_millions,dominant_industries
+TX,8.5,12.0,4.7,67500,32.0,30.0,"Oil & Gas, Technology, Healthcare, Trade"
+MA,9.0,0.3,12.5,89645,45.0,7.0,"Healthcare, Higher Education, Technology, Finance"
+OH,16.5,1.8,11.8,59750,29.0,11.8,"Manufacturing, Healthcare, Agriculture, Logistics"
