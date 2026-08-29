@@ -1,0 +1,8 @@
+Specification,TX B1,TX p-value,MA B1,MA p-value,OH B1,OH p-value,Notes
+Simple OLS (no controls),-0.3526,<0.0001,-0.3478,<0.0001,-0.3639,<0.0001,Bivariate; per state
+OLS with Oil Control,-0.327,<0.0001,-0.3605,<0.0001,-0.4093,<0.0001,Adds WTI oil price
+Full OLS (all controls),-0.0135,0.6595,-0.0154,0.4838,0.0147,0.4599,"Adds national infl., mortgage, fed funds"
+Pooled Panel OLS,-0.026,0.0767,-0.026,0.0767,-0.026,0.0767,Pooled across states; ignores panel structure
+Panel with State FE,-0.0106,0.2907,-0.0106,0.2907,-0.0106,0.2907,"Pooled; state fixed effects, SE clustered by state"
+Panel with Two-Way FE,-0.0843,0.0002,-0.0843,0.0002,-0.0843,0.0002,Pooled; state + time FE; controls absorbed
+Full OLS with Newey-West SE,-0.0135,0.7511,-0.0154,0.4191,0.0147,0.6637,Full model; HAC (maxlags=12) SEs
