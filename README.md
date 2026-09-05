@@ -201,7 +201,9 @@ That last part was not what I expected, and it is worth stating plainly. Oil is 
 
 Once national inflation, oil, mortgage rates, and the fed funds rate are all in the model, the unemployment coefficient collapses by about 96% and loses significance everywhere. Ohio's even flips sign. Meanwhile R² jumps to roughly 0.9, so the controls explain nearly all the variation the simple model was missing.
 
-The reason is national inflation. Its coefficient in the Texas model is **1.06** with a t-statistic of 43 — state inflation moves essentially one-for-one with the national rate. Whatever local labor markets are doing is swamped by the national price trend, and the strong bivariate slope from the first table was largely that national trend in disguise.
+The reason is national inflation, and specifically national inflation alone. Its coefficient in the Texas model is **1.06** with a t-statistic of 43 — state inflation moves essentially one-for-one with the national rate. I checked whether the controls were collectively responsible for the collapse or whether one of them was doing all the work: dropping only national inflation and keeping oil, mortgage rates, and the fed funds rate in the model returns the slope to **-0.327 (TX), -0.297 (MA), and -0.416 (OH)**, all significant. Every other control barely moves it.
+
+That is worth being careful about, because state and national inflation are correlated at **0.94, 0.92, and 0.97** — they are close to being the same variable. Part of that overlap is economic: states share a currency, a central bank, and national supply chains. But part of it is **mechanical, from how I built the data**. The state series is metro CPI with Census-region CPI filling the months the metro series does not publish, and since the metro series are bimonthly, roughly half the observations for Texas and Massachusetts are region-level. Regional CPI is a component of national CPI, so I am partly regressing a series on something that contains it. The full-model coefficient is best read as a **lower bound** on the local relationship, not a clean estimate of it — which is the strongest argument for the panel design below, where time fixed effects absorb national conditions without putting a near-copy of the outcome on the right-hand side.
 
 ### The most rigorous model finds a small surviving relationship
 
@@ -211,9 +213,11 @@ The reason is national inflation. Its coefficient in the Texas model is **1.06**
 | State fixed effects | -0.011 | 0.010 | 0.291 | State |
 | Two-way fixed effects | **-0.084** | 0.022 | **0.0002** | State + time |
 
-The first two specifications find nothing. The two-way fixed effects model — the most demanding one, which strips out both permanent state differences and every shock common to all states in a month — finds a small negative coefficient that is highly significant. It is about a quarter the size of the simple estimate.
+The first two specifications find nothing. The two-way fixed effects model — the most demanding one, which strips out both permanent state differences and every shock common to all states in a month — finds a negative coefficient about a quarter the size of the simple estimate.
 
-I read this as the honest answer to the project's question. The naive Phillips Curve is fragile; it evaporates the moment you control for anything. But a modest local relationship does survive the hardest test I can run, once national noise is swept out of the way. The two results are not in conflict, and the difference between -0.35 and -0.084 is the size of the confounding problem.
+**That p-value depends on the standard error method, and I could not confirm it under the conventional one.** The coefficient is identical no matter which covariance estimator I use; only the standard error changes. Clustered by state it is 0.022 (p = 0.0002). Heteroskedasticity-robust it is 0.053 (p = 0.12). Classical it is 0.049 (p = 0.08). So the result is significant under clustering and insignificant under both alternatives — and clustering is the choice I can least defend here, because cluster-robust standard errors need roughly 30 to 50 clusters to be reliable and **this panel has three states**. With too few clusters the estimator produces standard errors that are too small, which is exactly what the 0.022 looks like.
+
+So the honest reading is about the point estimate, not the p-value. The naive Phillips Curve is fragile; it evaporates the moment you control for anything. Sweeping out state baselines and common time shocks leaves a **stable negative estimate of -0.084** — roughly a quarter of the textbook slope, negative under every method — that I cannot confidently distinguish from zero with three states. The difference between -0.35 and -0.084 is the size of the confounding problem. Establishing significance would take more clusters, which means more states.
 
 ### The relationship is not stable over time
 
@@ -243,7 +247,9 @@ Re-estimating with Newey-West standard errors (12 monthly lags) moves the standa
 ## Limitations
 
 - **Only three states.** Expanding to all 50 would give far more statistical power and much more structural variation to exploit.
-- **State inflation is a constructed proxy.** Metro CPI spliced with regional CPI is not a direct measurement of state prices, and that measurement noise sits in the dependent variable, which biases estimated slopes toward zero.
+- **State inflation is a constructed proxy, and about half of it is regional.** Metro CPI spliced with Census-region CPI is not a direct measurement of state prices. Because the metro series are bimonthly, roughly half the monthly observations for Texas and Massachusetts are region-level — Houston alternating with the whole South, Boston with the Northeast. That mutes genuine state-specific price variation and biases estimated slopes toward zero, so the null results are partly a measurement artifact. (Related: the `cpi_index` column in the exported panel is a spliced level series that jumps between two index bases, so it should not be differenced to build your own inflation rate. Notebook 01 computes year-over-year rates on each source series separately and splices the rates, which is why `inflation_rate_yoy` is unaffected.)
+- **National inflation overlaps the dependent variable.** State and national inflation correlate at 0.92 to 0.97, and part of that is mechanical — the state series is built partly from regional CPI, which feeds the national index. Controlling for national inflation therefore removes more than just "national conditions," and the full model's near-zero unemployment coefficient is a lower bound on the local relationship rather than a clean measure of it.
+- **Three clusters is too few for cluster-robust inference.** The two-way fixed effects result is significant with standard errors clustered by state but not with heteroskedasticity-robust ones, and the method needs roughly 30 to 50 clusters to be trusted. With three states I can defend the point estimate and its direction, not its statistical significance.
 - **Correlation, not causation.** Unemployment and inflation are both driven by the business cycle. Pinning down a causal direction would need something like instrumental variables, which is beyond this project's scope.
 - **No inflation expectations.** Modern Phillips Curve theory treats expected inflation as a central variable. State-level expectations data does not exist, so the model omits something the theory says matters.
 - **Linear and same-month only.** The real relationship may be nonlinear — steeper at very low unemployment — and it may operate with a lag, since wage bargains and price resets take months to work through. My specification allows for neither.
@@ -275,8 +281,20 @@ phillips-curve-states/
 │   ├── master_regression_results.csv
 │   └── panel_regression_results.csv
 ├── figures/
+├── notes/
+│   └── analysis-audit.md
+├── scripts/
+│   └── audit_project.py
 └── README.md
 ```
+
+`notes/analysis-audit.md` is a self-review of the analysis: I re-ran every major
+claim against the data and documented where the results are strong, where they are
+fragile, and where the interpretation needed a caveat. The two issues worth reading
+about before quoting any number from this project are the three-cluster standard
+error problem and the overlap between state and national inflation.
+`scripts/audit_project.py` is the data and repository quality check (72 checks, exits
+non-zero on failure).
 
 The SQLite database and the raw FRED downloads are gitignored. They are large and fully reproducible by running notebook 01.
 
